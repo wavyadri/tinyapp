@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080;
 
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: true })); // allow us to access info from forms
+app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
 
 function generateRandomString() {
   let randomString = '';
@@ -43,6 +43,24 @@ app.post('/urls', (req, res) => {
 app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
+});
+
+// edit button
+app.post('/urls/:shortURL', (req, res) => {
+  // get the new user input
+  const longURL = req.body.longURL;
+  // update obj at shortURL
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = longURL;
+  // render urls/shortURL with new info
+  // res.render('/urls/' + shortURL);
+  res.redirect('/urls');
+});
+
+// edit button redirect from home
+app.get('/urls', (req, res) => {
+  const shortURL = req.body.shortURL;
+  res.redirect('/urls' + shortURL);
 });
 
 app.get('/urls/new', (req, res) => {
