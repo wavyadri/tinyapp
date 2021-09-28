@@ -31,11 +31,18 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// submit button
 app.post('/urls', (req, res) => {
   console.log('req.body:', req.body); // Log the POST request body to the console
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL; // save new url to urlDatabase
   res.redirect('/urls/' + shortURL); // redirection to /urls/:shortURL
+});
+
+// delete button
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
 });
 
 app.get('/urls/new', (req, res) => {
