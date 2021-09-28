@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080;
 
 const bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true })); // allow us to access info from forms
 
 function generateRandomString() {
   let randomString = '';
@@ -47,6 +47,7 @@ app.get('/urls/:shortURL', (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
+
   res.render('urls_show', templateVars);
 });
 
