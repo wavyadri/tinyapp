@@ -1,9 +1,11 @@
 const express = require('express');
 const app = express();
 const PORT = 8080;
-
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
+app.use(cookieParser());
 
 function generateRandomString() {
   let randomString = '';
@@ -26,8 +28,9 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+// main page
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
   res.render('urls_index', templateVars);
 });
 
@@ -63,22 +66,41 @@ app.get('/urls', (req, res) => {
   res.redirect('/urls' + shortURL);
 });
 
-app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+// username login button - set cookie
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  res.redirect('/urls');
 });
 
+// username logout button - clear cookie
+app.post('/logout', (req, res) => {
+  // clear cookie
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
+// make a new link page
+app.get('/urls/new', (req, res) => {
+  const templateVars = {
+    username: req.cookies['username'],
+  };
+  res.render('urls_new', templateVars);
+});
+
+// individual link page
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
+    username: req.cookies['username'],
   };
 
   res.render('urls_show', templateVars);
 });
 
+// click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
-  console.log(req.params);
   res.redirect(longURL);
 });
 
