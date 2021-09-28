@@ -49,8 +49,10 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   // get the new user input
   const longURL = req.body.longURL;
+  console.log('longURL:', longURL);
   // update obj at shortURL
   const shortURL = req.params.shortURL;
+  console.log('shortURL:', shortURL);
   urlDatabase[shortURL] = longURL;
   // render urls/shortURL with new info
   // res.render('/urls/' + shortURL);
