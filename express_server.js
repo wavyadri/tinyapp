@@ -10,20 +10,15 @@ app.use(cookieParser());
 app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
 
 // Databases
-// const urlDatabase = {
-//   shortURL: 'http://www.lighthouselabs.ca',
-//   '9sm5xK': 'http://www.google.com',
-// };
-
 const urlDatabase = {
-  // shortURL: {
-  //   longURL: 'https://www.tsn.ca',
-  //   userID: 'aJ48lW',
-  // },
-  // i3BoGr: {
-  //   longURL: 'https://www.google.ca',
-  //   userID: 'aJ48lW',
-  // },
+  shortURL: {
+    longURL: 'https://www.tsn.ca',
+    userID: 'aJ48lW',
+  },
+  i3BoGr: {
+    longURL: 'https://www.google.ca',
+    userID: 'aJ48lW',
+  },
 };
 
 const users = {
@@ -53,13 +48,6 @@ function getUserId(email, userDb) {
   return null;
 }
 
-// function findUserById(userId, userDb) {
-//   for (const user in userDb) {
-//     if (user === userId) return userDb[user];
-//   }
-//   return false;
-// }
-
 function validRegistration(email, password) {
   if (email === '' || password === '') return false;
   return true;
@@ -73,7 +61,6 @@ function userIsFound(email, userDb) {
 }
 
 // HTTP requests
-
 app.get('/', (req, res) => {
   res.redirect('/register');
 });
@@ -244,6 +231,11 @@ app.get('/urls/:shortURL', (req, res) => {
 
 // click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
+  if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.status(404).send('Not found! This URL does not exist!');
+    return;
+  }
+
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
