@@ -74,7 +74,8 @@ app.get('/urls.json', (req, res) => {
 // main page
 app.get('/urls', (req, res) => {
   const userId = req.cookies['user_id'];
-  const templateVars = { urls: urlDatabase, users: users[userId] };
+  const user = users[userId];
+  const templateVars = { urls: urlDatabase, user };
   console.log(templateVars);
   res.render('urls_index', templateVars);
 });
@@ -82,7 +83,8 @@ app.get('/urls', (req, res) => {
 // login page
 app.get('/login', (req, res) => {
   const userId = req.cookies['user_id'];
-  const templateVars = { users: users[userId] };
+  const user = users[userId];
+  const templateVars = { user };
 
   res.render('urls_login', templateVars);
 });
@@ -118,7 +120,8 @@ app.post('/login', (req, res) => {
 // register page
 app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
-  const templateVars = { users: users[userId] };
+  const user = users[userId];
+  const templateVars = { user };
 
   res.render('urls_register', templateVars);
 });
@@ -152,7 +155,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-// submit button
+// make new link submit button
 app.post('/urls', (req, res) => {
   console.log('req.body:', req.body); // Log the POST request body to the console
   const shortURL = generateRandomString();
@@ -166,7 +169,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-// edit button
+// edit submit button
 app.post('/urls/:shortURL', (req, res) => {
   // get the new user input
   const longURL = req.body.longURL;
@@ -178,7 +181,7 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls');
 });
 
-// edit button redirect from home
+// edit redirect from home button
 app.get('/urls', (req, res) => {
   const shortURL = req.body.shortURL;
   res.redirect('/urls' + shortURL);
@@ -193,21 +196,20 @@ app.post('/logout', (req, res) => {
 // make a new link page
 app.get('/urls/new', (req, res) => {
   const userId = req.cookies['user_id'];
-
-  const templateVars = {
-    users: users[userId],
-  };
+  const user = users[userId];
+  const templateVars = { user };
   res.render('urls_new', templateVars);
 });
 
-// individual edit link page
+// edit link page
 app.get('/urls/:shortURL', (req, res) => {
   const userId = req.cookies['user_id'];
+  const user = users[userId];
 
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    users: users[userId],
+    user,
   };
 
   res.render('urls_show', templateVars);
