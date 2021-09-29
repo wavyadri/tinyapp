@@ -60,6 +60,16 @@ function userIsFound(email, userDb) {
   return false;
 }
 
+function getUserURL(userId, userDb) {
+  let userURL = {};
+  for (const key in userDb) {
+    if (userDb[key].userID === userId) {
+      userURL[key] = { longURL: userDb[key].longURL };
+    }
+  }
+  return userURL;
+}
+
 // HTTP requests
 app.get('/', (req, res) => {
   res.redirect('/register');
@@ -73,9 +83,18 @@ app.get('/urls.json', (req, res) => {
 app.get('/urls', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
-  const templateVars = { urls: urlDatabase, user };
   console.log(urlDatabase);
   console.log(users);
+
+  if (!user) {
+    res.status(401).send('Please login or register to access TinyApp.');
+    return;
+  }
+
+  // get only urls matching userId
+  let userURL = getUserURL(userId, urlDatabase);
+
+  const templateVars = { urls: userURL, user };
   res.render('urls_index', templateVars);
 });
 
@@ -168,7 +187,6 @@ app.post('/urls', (req, res) => {
     res.status(401).send('Please login or register to access TinyApp.');
     return;
   }
-
   res.redirect('/urls/' + shortURL);
 });
 
