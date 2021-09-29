@@ -42,12 +42,12 @@ function getUserId(email, userDb) {
   return null;
 }
 
-function findUserById(userId, userDb) {
-  for (const user in userDb) {
-    if (user === userId) return userDb[user];
-  }
-  return false;
-}
+// function findUserById(userId, userDb) {
+//   for (const user in userDb) {
+//     if (user === userId) return userDb[user];
+//   }
+//   return false;
+// }
 
 function validRegistration(email, password) {
   if (email === '' || password === '') return false;
@@ -74,19 +74,15 @@ app.get('/urls.json', (req, res) => {
 // main page
 app.get('/urls', (req, res) => {
   const userId = req.cookies['user_id'];
-  const user = findUserById(userId, users);
-  const templateVars = { urls: urlDatabase, users: user };
-
-  console.log(users);
-
+  const templateVars = { urls: urlDatabase, users: users[userId] };
+  console.log(templateVars);
   res.render('urls_index', templateVars);
 });
 
 // login page
 app.get('/login', (req, res) => {
   const userId = req.cookies['user_id'];
-  const user = findUserById(userId, users);
-  const templateVars = { users: user };
+  const templateVars = { users: users[userId] };
 
   res.render('urls_login', templateVars);
 });
@@ -115,7 +111,6 @@ app.post('/login', (req, res) => {
     return;
   }
 
-  console.log(users);
   res.cookie('user_id', id);
   res.redirect('/urls');
 });
@@ -123,14 +118,12 @@ app.post('/login', (req, res) => {
 // register page
 app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
-  const user = findUserById(userId, users);
-  const templateVars = { users: user };
+  const templateVars = { users: users[userId] };
 
-  console.log(users);
   res.render('urls_register', templateVars);
 });
 
-// register button
+// register button - set cookie
 app.post('/register', (req, res) => {
   // TODO: refactor into create user helper
   const id = generateRandomString();
@@ -155,8 +148,6 @@ app.post('/register', (req, res) => {
 
   // set cookie
   res.cookie('user_id', id);
-
-  console.log(users);
   res.redirect('/urls');
 });
 
@@ -195,16 +186,15 @@ app.get('/urls', (req, res) => {
 // logout button - clear cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 // make a new link page
 app.get('/urls/new', (req, res) => {
   const userId = req.cookies['user_id'];
-  const user = findUserById(userId, users);
 
   const templateVars = {
-    users: user,
+    users: users[userId],
   };
   res.render('urls_new', templateVars);
 });
@@ -212,12 +202,11 @@ app.get('/urls/new', (req, res) => {
 // individual edit link page
 app.get('/urls/:shortURL', (req, res) => {
   const userId = req.cookies['user_id'];
-  const user = findUserById(userId, users);
 
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    users: user,
+    users: users[userId],
   };
 
   res.render('urls_show', templateVars);
