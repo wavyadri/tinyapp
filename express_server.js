@@ -14,6 +14,13 @@ function generateRandomString() {
   return randomString;
 }
 
+function findUserById(userId, userDb) {
+  for (let user in userDb) {
+    if (user === userId) return userDb[user];
+  }
+  return false;
+}
+
 const urlDatabase = {
   b2xVn2: 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
@@ -42,19 +49,24 @@ app.get('/urls.json', (req, res) => {
 
 // main page
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies['username'] };
+  const userId = req.cookies['user_id'];
+  const user = findUserById(userId, users);
+  const templateVars = { urls: urlDatabase, users: user };
   res.render('urls_index', templateVars);
 });
 
 // register
 app.get('/register', (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const userId = req.cookies['user_id'];
+  const user = findUserById(userId, users);
+  const templateVars = { users: user };
 
   res.render('register', templateVars);
 });
 
 // sign up / register button
 app.post('/register', (req, res) => {
+  // TODO: refactor into create user helper
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
@@ -110,18 +122,24 @@ app.post('/logout', (req, res) => {
 
 // make a new link page
 app.get('/urls/new', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = findUserById(userId, users);
+
   const templateVars = {
-    username: req.cookies['username'],
+    users: user,
   };
   res.render('urls_new', templateVars);
 });
 
 // individual edit link page
 app.get('/urls/:shortURL', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = findUserById(userId, users);
+
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies['username'],
+    users: user,
   };
 
   res.render('urls_show', templateVars);
