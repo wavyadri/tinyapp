@@ -72,13 +72,22 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// login page
+app.get('/login', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = findUserById(userId, users);
+  const templateVars = { users: user };
+
+  res.render('urls_login', templateVars);
+});
+
 // register page
 app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = findUserById(userId, users);
   const templateVars = { users: user };
 
-  res.render('register', templateVars);
+  res.render('urls_register', templateVars);
 });
 
 // sign up / register button
