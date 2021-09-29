@@ -53,6 +53,17 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
+// sign up / register button
+app.post('/register', (req, res) => {
+  const id = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  users[id] = { id, email, password };
+  // set cookie
+  res.cookie('user_id', id);
+  res.redirect('/urls');
+});
+
 // submit button
 app.post('/urls', (req, res) => {
   console.log('req.body:', req.body); // Log the POST request body to the console
