@@ -11,7 +11,7 @@ app.set('view engine', 'ejs'); // tells Express app to use EJS as templating eng
 
 // Databases
 const urlDatabase = {
-  shortURL: {
+  sgq3y6: {
     longURL: 'https://www.tsn.ca',
     userID: 'aJ48lW',
   },
@@ -192,6 +192,18 @@ app.post('/urls', (req, res) => {
 
 // delete button
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
+  if (!user) {
+    res
+      .status(401)
+      .send(
+        "You can't delete this, that's not your link! Please login or register to access TinyApp."
+      );
+    return;
+  }
+
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
