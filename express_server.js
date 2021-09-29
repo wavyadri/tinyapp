@@ -34,6 +34,13 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+// register
+app.get('/register', (req, res) => {
+  const templateVars = { username: req.cookies['username'] };
+
+  res.render('register', templateVars);
+});
+
 // submit button
 app.post('/urls', (req, res) => {
   console.log('req.body:', req.body); // Log the POST request body to the console
@@ -66,13 +73,13 @@ app.get('/urls', (req, res) => {
   res.redirect('/urls' + shortURL);
 });
 
-// username login button - set cookie
+// login button - set cookie
 app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
 
-// username logout button - clear cookie
+// logout button - clear cookie
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
@@ -86,7 +93,7 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-// individual link page
+// individual edit link page
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
