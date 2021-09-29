@@ -4,6 +4,7 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
 app.use(cookieParser());
@@ -60,6 +61,7 @@ function userIsFound(email, userDb) {
   return false;
 }
 
+// add userDb back as a param!!!!!!
 function urlsForUser(userId) {
   let userURL = {};
   for (const key in urlDatabase) {
@@ -166,8 +168,10 @@ app.post('/register', (req, res) => {
     return;
   }
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   // after checks have passed, add new user to db
-  users[id] = { id, email, password };
+  users[id] = { id, email, hashedPassword };
 
   // set cookie
   res.cookie('user_id', id);
