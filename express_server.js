@@ -127,7 +127,7 @@ app.post('/login', (req, res) => {
   }
 
   // check if a user with this password exists
-  if (users[id].password !== password) {
+  if (bcrypt.compareSync(password, users[id].hashedPassword) === false) {
     res
       .status(403)
       .send('Incorrect user email and password combination. Please try again.');
