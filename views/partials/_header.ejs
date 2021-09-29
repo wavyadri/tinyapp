@@ -20,11 +20,9 @@
     </div>
     <!-- login/logout form -->
     <% if (!users) { %>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/register">Register</a>
-        <a class="nav-item nav-link" href="/login">Login</a>
-      </div>
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" href="/register">Register</a>
+      <a class="nav-item nav-link" href="/login">Login</a>
     </div>
     <% } else {%>
     <form action="/logout" method="POST" class="form-inline">
