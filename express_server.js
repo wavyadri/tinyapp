@@ -22,16 +22,16 @@ const urlDatabase = {
 };
 
 const users = {
-  // userRandomID: {
-  //   id: 'userRandomID',
-  //   email: 'user@example.com',
-  //   password: 'purple-monkey-dinosaur',
-  // },
-  // user2RandomID: {
-  //   id: 'user2RandomID',
-  //   email: 'user2@example.com',
-  //   password: 'dishwasher-funk',
-  // },
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur',
+  },
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk',
+  },
 };
 
 // Helper functions
@@ -75,6 +75,7 @@ app.get('/', (req, res) => {
   res.redirect('/register');
 });
 
+// json
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
@@ -199,7 +200,18 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     res
       .status(401)
       .send(
-        "You can't delete this, that's not your link! Please login or register to access TinyApp."
+        "You can't delete this! Please login or register to access TinyApp."
+      );
+    return;
+  }
+
+  // if url id does not match their own
+  let shortURL = req.params.shortURL;
+  if (urlDatabase[shortURL].userID !== userId) {
+    res
+      .status(401)
+      .send(
+        "That's not your link, you can't delete this! Please login or register to access TinyApp."
       );
     return;
   }
@@ -210,9 +222,20 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // edit submit button
 app.post('/urls/:shortURL', (req, res) => {
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
+
+  if (!user) {
+    res
+      .status(401)
+      .send(
+        "You can't edit this, that's not your link! Please login or register to access TinyApp."
+      );
+    return;
+  }
+
   // get the new user input
   const longURL = req.body.longURL;
-
   // update obj at shortURL
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL].longURL = longURL;
@@ -258,7 +281,7 @@ app.get('/urls/:shortURL', (req, res) => {
       );
     return;
   }
-  // if url id does not match theur own
+  // if url id does not match their own
   let shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID !== userId) {
     res
@@ -280,7 +303,6 @@ app.get('/urls/:shortURL', (req, res) => {
 
 // click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
-  console.log(urlDatabase);
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.status(404).send('Not found! This URL does not exist on TinyApp!');
     return;
