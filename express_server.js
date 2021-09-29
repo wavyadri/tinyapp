@@ -64,7 +64,7 @@ function getUserURL(userId, userDb) {
   let userURL = {};
   for (const key in userDb) {
     if (userDb[key].userID === userId) {
-      userURL[key] = { longURL: userDb[key].longURL };
+      userURL[key] = { longURL: userDb[key].longURL, userID: userId };
     }
   }
   return userURL;
@@ -237,6 +237,11 @@ app.get('/urls/new', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
+
+  if (!user) {
+    res.status(401).send('Please login or register to access TinyApp.');
+    return;
+  }
 
   const templateVars = {
     shortURL: req.params.shortURL,
