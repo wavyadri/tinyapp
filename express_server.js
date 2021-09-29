@@ -1,3 +1,4 @@
+// Server setup
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -8,19 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.bo
 app.use(cookieParser());
 app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
 
-function generateRandomString() {
-  let randomString = '';
-  randomString = Math.random().toString(36).slice(6);
-  return randomString;
-}
-
-function findUserById(userId, userDb) {
-  for (let user in userDb) {
-    if (user === userId) return userDb[user];
-  }
-  return false;
-}
-
+// Databases
 const urlDatabase = {
   b2xVn2: 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
@@ -39,6 +28,34 @@ const users = {
   },
 };
 
+// Helper functions
+function generateRandomString() {
+  let randomString = '';
+  randomString = Math.random().toString(36).slice(6);
+  return randomString;
+}
+
+function findUserById(userId, userDb) {
+  for (const user in userDb) {
+    if (user === userId) return userDb[user];
+  }
+  return false;
+}
+
+function validRegistration(email, password) {
+  if (email === '' || password === '') return false;
+  return true;
+}
+
+function userIsFound(email, userDb) {
+  for (const key in userDb) {
+    if (userDb[key].email === email) return true;
+  }
+  return false;
+}
+
+// HTTP requests
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -55,7 +72,7 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-// register
+// register page
 app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = findUserById(userId, users);
@@ -70,9 +87,27 @@ app.post('/register', (req, res) => {
   const id = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+
+  // check if email and password are empty
+  if (!validRegistration(email, password)) {
+    res.status(400).send('Invalid email and/or password. Please try again.');
+    return;
+  }
+
+  // check if email already exists in Db
+  if (userIsFound(email, users)) {
+    res
+      .status(400)
+      .send(`A user with ${email} has already registered. Please try again.`);
+  }
+
+  // after checks have passed, add new user to db
   users[id] = { id, email, password };
+
   // set cookie
   res.cookie('user_id', id);
+
+  console.log(users);
   res.redirect('/urls');
 });
 
