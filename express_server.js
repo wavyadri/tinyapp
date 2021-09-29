@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
 app.use(cookieParser());
+app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
 
 function generateRandomString() {
   let randomString = '';
@@ -13,11 +14,22 @@ function generateRandomString() {
   return randomString;
 }
 
-app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
-
 const urlDatabase = {
   b2xVn2: 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
+};
+
+const users = {
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur',
+  },
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk',
+  },
 };
 
 app.get('/', (req, res) => {
