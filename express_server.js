@@ -64,7 +64,7 @@ function userIsFound(email, userDb) {
 // HTTP requests
 
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  res.redirect('/register');
 });
 
 app.get('/urls.json', (req, res) => {
@@ -141,6 +141,7 @@ app.post('/register', (req, res) => {
     res
       .status(400)
       .send(`A user with ${email} has already registered. Please try again.`);
+    return;
   }
 
   // after checks have passed, add new user to db
