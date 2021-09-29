@@ -10,22 +10,33 @@ app.use(cookieParser());
 app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
 
 // Databases
+// const urlDatabase = {
+//   shortURL: 'http://www.lighthouselabs.ca',
+//   '9sm5xK': 'http://www.google.com',
+// };
+
 const urlDatabase = {
-  b2xVn2: 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com',
+  // shortURL: {
+  //   longURL: 'https://www.tsn.ca',
+  //   userID: 'aJ48lW',
+  // },
+  // i3BoGr: {
+  //   longURL: 'https://www.google.ca',
+  //   userID: 'aJ48lW',
+  // },
 };
 
 const users = {
-  userRandomID: {
-    id: 'userRandomID',
-    email: 'user@example.com',
-    password: 'purple-monkey-dinosaur',
-  },
-  user2RandomID: {
-    id: 'user2RandomID',
-    email: 'user2@example.com',
-    password: 'dishwasher-funk',
-  },
+  // userRandomID: {
+  //   id: 'userRandomID',
+  //   email: 'user@example.com',
+  //   password: 'purple-monkey-dinosaur',
+  // },
+  // user2RandomID: {
+  //   id: 'user2RandomID',
+  //   email: 'user2@example.com',
+  //   password: 'dishwasher-funk',
+  // },
 };
 
 // Helper functions
@@ -76,7 +87,8 @@ app.get('/urls', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
   const templateVars = { urls: urlDatabase, user };
-  console.log(templateVars);
+  console.log(urlDatabase);
+  console.log(users);
   res.render('urls_index', templateVars);
 });
 
@@ -157,10 +169,20 @@ app.post('/register', (req, res) => {
 
 // make new link submit button
 app.post('/urls', (req, res) => {
-  console.log('req.body:', req.body); // Log the POST request body to the console
+  const userId = req.cookies['user_id'];
+  const user = users[userId];
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL; // save new url to urlDatabase
-  res.redirect('/urls/' + shortURL); // redirection to /urls/:shortURL
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: userId,
+  };
+
+  if (!user) {
+    res.status(401).send('Please login or register to access TinyApp.');
+    return;
+  }
+
+  res.redirect('/urls/' + shortURL);
 });
 
 // delete button
@@ -176,7 +198,7 @@ app.post('/urls/:shortURL', (req, res) => {
 
   // update obj at shortURL
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL].longURL = longURL;
 
   res.redirect('/urls');
 });
@@ -198,6 +220,11 @@ app.get('/urls/new', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = users[userId];
   const templateVars = { user };
+
+  if (!user) {
+    res.redirect('/login');
+    return;
+  }
   res.render('urls_new', templateVars);
 });
 
@@ -208,7 +235,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user,
   };
 
@@ -217,7 +244,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
 // click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
