@@ -35,6 +35,13 @@ function generateRandomString() {
   return randomString;
 }
 
+function getUserId(email, userDb) {
+  for (const key in userDb) {
+    if (userDb[key].email === email) return key;
+  }
+  return null;
+}
+
 function findUserById(userId, userDb) {
   for (const user in userDb) {
     if (user === userId) return userDb[user];
@@ -69,6 +76,9 @@ app.get('/urls', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = findUserById(userId, users);
   const templateVars = { urls: urlDatabase, users: user };
+
+  console.log(users);
+
   res.render('urls_index', templateVars);
 });
 
@@ -81,16 +91,46 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templateVars);
 });
 
+// login button - set cookie
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = getUserId(email, users);
+
+  // check if a user exists with this email
+  if (!userIsFound(email, users)) {
+    res
+      .status(403)
+      .send(
+        `A user with the email ${email} cannot be found. Please try again or register.`
+      );
+    return;
+  }
+
+  // check if a user with this password exists
+  if (users[id].password !== password) {
+    res
+      .status(403)
+      .send('Incorrect user email and password combination. Please try again.');
+    return;
+  }
+
+  console.log(users);
+  res.cookie('user_id', id);
+  res.redirect('/urls');
+});
+
 // register page
 app.get('/register', (req, res) => {
   const userId = req.cookies['user_id'];
   const user = findUserById(userId, users);
   const templateVars = { users: user };
 
+  console.log(users);
   res.render('urls_register', templateVars);
 });
 
-// sign up / register button
+// register button
 app.post('/register', (req, res) => {
   // TODO: refactor into create user helper
   const id = generateRandomString();
@@ -152,15 +192,9 @@ app.get('/urls', (req, res) => {
   res.redirect('/urls' + shortURL);
 });
 
-// login button - set cookie
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
-
 // logout button - clear cookie
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
