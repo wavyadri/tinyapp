@@ -12,15 +12,23 @@ app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.bo
 app.use(
   cookieSession({
     name: 'session',
-    keys: [
-      /* secret keys */
-    ],
-
-    // Cookie Options
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    keys: ['sample'],
   })
 );
 app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
+
+// app.use((req, res, next) => {
+//   //refactor with user instead of email!!
+//   const email = req.session.email;
+//   const path = req.path;
+//   const allowedPaths = ['/', '/login'];
+
+//   if (!email && !allowedPaths.includes(path)) {
+//     return res.redirect;
+//   }
+
+//   next();
+// });
 
 // Databases
 const urlDatabase = {
@@ -96,7 +104,8 @@ app.get('/urls.json', (req, res) => {
 
 // main page
 app.get('/urls', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
   const user = users[userId];
   console.log(urlDatabase);
   console.log(users);
@@ -115,7 +124,8 @@ app.get('/urls', (req, res) => {
 
 // login page
 app.get('/login', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user };
 
@@ -139,20 +149,23 @@ app.post('/login', (req, res) => {
   }
 
   // check if a user with this password exists
-  if (bcrypt.compareSync(password, users[id].hashedPassword) === false) {
+  if (bcrypt.compareSync(password, users[id].password) === false) {
     res
       .status(403)
       .send('Incorrect user email and password combination. Please try again.');
     return;
   }
 
-  res.cookie('user_id', id);
+  // res.cookie('user_id', id);
+  req.session.user_id = id;
   res.redirect('/urls');
 });
 
 // register page
 app.get('/register', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
   const templateVars = { user };
 
@@ -164,7 +177,8 @@ app.post('/register', (req, res) => {
   // TODO: refactor into create user helper
   const id = generateRandomString();
   const email = req.body.email;
-  const password = req.body.password;
+  // const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
 
   // check if email and password are empty
   if (!validRegistration(email, password)) {
@@ -180,19 +194,22 @@ app.post('/register', (req, res) => {
     return;
   }
 
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  // const hashedPassword = bcrypt.hashSync(password, 10);
 
   // after checks have passed, add new user to db
-  users[id] = { id, email, hashedPassword };
+  users[id] = { id, email, password };
 
   // set cookie
-  res.cookie('user_id', id);
+  // res.cookie('user_id', id);
+  req.session.user_id = id;
   res.redirect('/urls');
 });
 
 // make new link submit button
 app.post('/urls', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
@@ -209,7 +226,9 @@ app.post('/urls', (req, res) => {
 
 // delete button
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
 
   if (!user) {
@@ -238,7 +257,9 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // edit submit button
 app.post('/urls/:shortURL', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
 
   if (!user) {
@@ -267,13 +288,16 @@ app.get('/urls', (req, res) => {
 
 // logout button - clear cookie
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
 // make a new link page
 app.get('/urls/new', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
   const templateVars = { user };
 
@@ -286,7 +310,9 @@ app.get('/urls/new', (req, res) => {
 
 // edit link page
 app.get('/urls/:shortURL', (req, res) => {
-  const userId = req.cookies['user_id'];
+  // const userId = req.cookies['user_id'];
+  const userId = req.session.user_id;
+
   const user = users[userId];
 
   if (!user) {
