@@ -60,11 +60,11 @@ function userIsFound(email, userDb) {
   return false;
 }
 
-function getUserURL(userId, userDb) {
+function urlsForUser(userId) {
   let userURL = {};
-  for (const key in userDb) {
-    if (userDb[key].userID === userId) {
-      userURL[key] = { longURL: userDb[key].longURL, userID: userId };
+  for (const key in urlDatabase) {
+    if (urlDatabase[key].userID === userId) {
+      userURL[key] = { longURL: urlDatabase[key].longURL, userID: userId };
     }
   }
   return userURL;
@@ -92,7 +92,7 @@ app.get('/urls', (req, res) => {
   }
 
   // get only urls matching userId
-  let userURL = getUserURL(userId, urlDatabase);
+  let userURL = urlsForUser(userId);
 
   const templateVars = { urls: userURL, user };
   res.render('urls_index', templateVars);
@@ -239,7 +239,21 @@ app.get('/urls/:shortURL', (req, res) => {
   const user = users[userId];
 
   if (!user) {
-    res.status(401).send('Please login or register to access TinyApp.');
+    res
+      .status(401)
+      .send(
+        "That's not your link! Please login or register to access TinyApp."
+      );
+    return;
+  }
+  // if url id does not match theur own
+  let shortURL = req.params.shortURL;
+  if (urlDatabase[shortURL].userID !== userId) {
+    res
+      .status(401)
+      .send(
+        "That's not your link! Please login or register to access TinyApp."
+      );
     return;
   }
 
@@ -254,8 +268,9 @@ app.get('/urls/:shortURL', (req, res) => {
 
 // click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
+  console.log(urlDatabase);
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
-    res.status(404).send('Not found! This URL does not exist!');
+    res.status(404).send('Not found! This URL does not exist on TinyApp!');
     return;
   }
 
