@@ -3,11 +3,23 @@ const express = require('express');
 const app = express();
 const PORT = 8080;
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
+var cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
-app.use(cookieParser());
+// app.use(cookieParser());
+app.use(
+  cookieSession({
+    name: 'session',
+    keys: [
+      /* secret keys */
+    ],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  })
+);
 app.set('view engine', 'ejs'); // tells Express app to use EJS as templating engine
 
 // Databases
