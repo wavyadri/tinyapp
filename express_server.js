@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
 var cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { getUserByEmail } = require('./helpers');
 
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
 // app.use(cookieParser());
@@ -76,20 +77,12 @@ function validRegistration(email, password) {
   return true;
 }
 
-function userIsFound(email, database) {
-  for (const key in database) {
-    if (database[key].email === email) return true;
-  }
-  return false;
-}
-
-const getUserByEmail = function (email, database) {
-  for (let key in database) {
-    if (database[key].email === email) {
-      return database[key].id;
-    }
-  }
-};
+// function userIsFound(email, database) {
+//   for (const key in database) {
+//     if (database[key].email === email) return true;
+//   }
+//   return false;
+// }
 
 // add userDb back as a param!!!!!!
 function urlsForUser(userId) {
