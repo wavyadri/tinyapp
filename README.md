@@ -4,9 +4,15 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
+### Login to access TinyApp
+
 !["Screenshot of login page"](https://github.com/wavyadri/tinyapp/raw/master/docs/login-page.png)
 
+### Find all of your links in one place
+
 !["Screenshot of URLs page"](https://github.com/wavyadri/tinyapp/blob/master/docs/urls-page.png)
+
+### Edit your links
 
 !["Screenshot of edit URLs page"](https://github.com/wavyadri/tinyapp/blob/master/docs/edit-url-page.png)
 
