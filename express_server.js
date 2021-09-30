@@ -111,6 +111,7 @@ app.post('/login', (req, res) => {
     return;
   }
 
+  // set session
   req.session.user_id = user.id;
   res.redirect('/urls');
 });
@@ -144,10 +145,9 @@ app.post('/register', (req, res) => {
     return;
   }
 
-  // after checks have passed, create new user to db
+  // if checks have passed, create new user to db
   users[id] = { id, email, password: hashedPassword };
 
-  // set cookie
   req.session.user_id = id;
   res.redirect('/urls');
 });
@@ -173,7 +173,6 @@ app.post('/urls', (req, res) => {
 // delete button
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userId = req.session.user_id;
-
   const user = users[userId];
 
   if (!user) {
@@ -185,8 +184,8 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     return;
   }
 
-  // if url id does not match their own
-  let shortURL = req.params.shortURL;
+  // if url owner id does not match current user id
+  const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID !== userId) {
     res
       .status(401)
@@ -196,7 +195,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
     return;
   }
 
-  delete urlDatabase[req.params.shortURL];
+  delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
@@ -217,7 +216,7 @@ app.post('/urls/:shortURL', (req, res) => {
   // get the new user input
   const longURL = req.body.longURL;
 
-  // update shortURL item
+  // update shortURL in database
   const shortURL = req.params.shortURL;
   urlDatabase[shortURL].longURL = longURL;
 
@@ -239,7 +238,6 @@ app.post('/logout', (req, res) => {
 // make a new link page
 app.get('/urls/new', (req, res) => {
   const userId = req.session.user_id;
-
   const user = users[userId];
   const templateVars = { user };
 
@@ -247,6 +245,7 @@ app.get('/urls/new', (req, res) => {
     res.redirect('/login');
     return;
   }
+
   res.render('urls_new', templateVars);
 });
 
@@ -263,8 +262,9 @@ app.get('/urls/:shortURL', (req, res) => {
       );
     return;
   }
+
   // if url id does not match their own
-  let shortURL = req.params.shortURL;
+  const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID !== userId) {
     res
       .status(401)
@@ -276,7 +276,7 @@ app.get('/urls/:shortURL', (req, res) => {
 
   const templateVars = {
     shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL,
+    longURL: urlDatabase[shortURL].longURL,
     user,
   };
 
