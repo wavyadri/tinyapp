@@ -4,11 +4,11 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["Screenshot of login page"](https://github.com/lighthouse-labs/tinyapp/raw/master/docs/login-page.png)
+!["Screenshot of login page"](https://github.com/wavyadri/tinyapp/raw/master/docs/login-page.png)
 
-!["Screenshot of URLs page"](https://github.com/lighthouse-labs/tinyapp/blob/master/docs/urls-page.png)
+!["Screenshot of URLs page"](https://github.com/wavyadri/tinyapp/blob/master/docs/urls-page.png)
 
-!["Screenshot of edit URLs page"](https://github.com/lighthouse-labs/tinyapp/blob/master/docs/edit-url-page.png)
+!["Screenshot of edit URLs page"](https://github.com/wavyadri/tinyapp/blob/master/docs/edit-url-page.png)
 
 ## Dependencies
 
