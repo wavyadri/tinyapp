@@ -9,7 +9,7 @@ const salt = bcrypt.genSaltSync(10);
 const {
   getUserByEmail,
   generateRandomString,
-  urlsForUser,
+  getUrlsForUser,
 } = require('./helpers');
 
 app.use(bodyParser.urlencoded({ extended: true })); // allow us to access req.body
@@ -52,7 +52,17 @@ const users = {
 
 // HTTP requests
 app.get('/', (req, res) => {
-  res.redirect('/login');
+  // res.redirect('/login');
+
+  /// UPDATED VERSION /////
+  const userId = req.session.user_id;
+  const user = users[userId];
+
+  // check if user is logged in
+  if (!user) {
+    return res.redirect('/login');
+  }
+  res.redirect('/urls');
 });
 
 // json
@@ -67,12 +77,15 @@ app.get('/urls', (req, res) => {
 
   // check if user is logged in
   if (!user) {
-    res.status(401).send('Please login or register to access TinyApp.');
-    return;
+    return res
+      .status(401)
+      .send(
+        'Please <a href="/login">login</a> or <a href="/register">register</a> to access TinyApp.'
+      );
   }
 
   // get only URLs matching userId
-  const userURL = urlsForUser(userId, urlDatabase);
+  const userURL = getUrlsForUser(userId, urlDatabase);
 
   const templateVars = { urls: userURL, user };
   res.render('urls_index', templateVars);
@@ -93,21 +106,21 @@ app.post('/login', (req, res) => {
   const user = getUserByEmail(email, users);
 
   // check if a user exists with this email
-  if (!getUserByEmail(email, users)) {
-    res
-      .status(403)
+  if (!user) {
+    return res
+      .status(401)
       .send(
-        `A user with the email ${email} cannot be found. Please try again or register.`
+        `A user with the email ${email} cannot be found. Please try to <a href="/login">login</a> again or <a href="/register">register</a> to access TinyApp.`
       );
-    return;
   }
 
   // check if a user exists with this password
   if (bcrypt.compareSync(password, user.password) === false) {
-    res
-      .status(403)
-      .send('Incorrect user email and password combination. Please try again.');
-    return;
+    return res
+      .status(401)
+      .send(
+        'Incorrect user email and password combination. Please try to <a href="/login">login</a> again or <a href="/register">register</a> to access TinyApp.'
+      );
   }
 
   // set session
@@ -132,16 +145,20 @@ app.post('/register', (req, res) => {
 
   // check if email and password are empty
   if (email === '' || password === '') {
-    res.status(400).send('Invalid email and/or password. Please try again.');
-    return;
+    return res
+      .status(400)
+      .send(
+        'Invalid email and/or password. Please try to <a href="/login">login</a> again.'
+      );
   }
 
   // check if email already exists in database
   if (getUserByEmail(email, users)) {
-    res
+    return res
       .status(400)
-      .send(`A user with ${email} has already registered. Please try again.`);
-    return;
+      .send(
+        `A user with ${email} has already registered. Please try to <a href="/login">login</a> again or <a href="/register">register</a> to access TinyApp.`
+      );
   }
 
   // if checks have passed, create new user to db
@@ -163,8 +180,11 @@ app.post('/urls', (req, res) => {
   };
 
   if (!user) {
-    res.status(401).send('Please login or register to access TinyApp.');
-    return;
+    return res
+      .status(401)
+      .send(
+        'Please <a href="/login">login</a> or <a href="/register">register</a> to access TinyApp.'
+      );
   }
   res.redirect('/urls/' + shortURL);
 });
@@ -175,23 +195,21 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const user = users[userId];
 
   if (!user) {
-    res
+    return res
       .status(401)
       .send(
-        "You can't delete this! Please login or register to access TinyApp."
+        "You can't delete this! Please <a href='/login'>login</a> or <a href='/register'>register</a> to access TinyApp."
       );
-    return;
   }
 
   // if url owner id does not match current user id
   const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID !== userId) {
-    res
+    return res
       .status(401)
       .send(
-        "That's not your link, you can't delete this! Please login or register to access TinyApp."
+        "That's not your link, you can't delete this! Please <a href='/login'>login</a> or <a href='/register'>register</a> to access TinyApp."
       );
-    return;
   }
 
   delete urlDatabase[shortURL];
@@ -204,12 +222,11 @@ app.post('/urls/:shortURL', (req, res) => {
   const user = users[userId];
 
   if (!user) {
-    res
+    return res
       .status(401)
       .send(
-        "You can't edit this, that's not your link! Please login or register to access TinyApp."
+        "You can't edit this, that's not your link! Please <a href='/login'>login</a> or <a href='/register'>register</a> to access TinyApp."
       );
-    return;
   }
 
   // get the new user input
@@ -228,12 +245,6 @@ app.get('/urls', (req, res) => {
   res.redirect('/urls' + shortURL);
 });
 
-// logout button - clear cookie
-app.post('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
-});
-
 // make a new link page
 app.get('/urls/new', (req, res) => {
   const userId = req.session.user_id;
@@ -241,8 +252,7 @@ app.get('/urls/new', (req, res) => {
   const templateVars = { user };
 
   if (!user) {
-    res.redirect('/login');
-    return;
+    return res.redirect('/login');
   }
 
   res.render('urls_new', templateVars);
@@ -254,23 +264,21 @@ app.get('/urls/:shortURL', (req, res) => {
   const user = users[userId];
 
   if (!user) {
-    res
+    return res
       .status(401)
       .send(
-        "That's not your link! Please login or register to access TinyApp."
+        "That's not your link! Please <a href='/login'>login</a> or <a href='/register'>register</a> to access TinyApp."
       );
-    return;
   }
 
   // if url id does not match their own
   const shortURL = req.params.shortURL;
   if (urlDatabase[shortURL].userID !== userId) {
-    res
+    return res
       .status(401)
       .send(
-        "That's not your link! Please login or register to access TinyApp."
+        "That's not your link! Please <a href='/login'>login</a> or <a href='/register'>register</a> to access TinyApp."
       );
-    return;
   }
 
   const templateVars = {
@@ -285,12 +293,17 @@ app.get('/urls/:shortURL', (req, res) => {
 // click on shortURL to be redirected to longURL
 app.get('/u/:shortURL', (req, res) => {
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
-    res.status(404).send('Not found! This URL does not exist on TinyApp!');
-    return;
+    return res.status(404).send('Not found! This URL is not valid on TinyApp!');
   }
 
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
+});
+
+// logout button - clear cookie
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
 });
 
 // test

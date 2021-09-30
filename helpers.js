@@ -13,7 +13,7 @@ const generateRandomString = () => {
   return randomString;
 };
 
-const urlsForUser = (userId, database) => {
+const getUrlsForUser = (userId, database) => {
   let userURL = {};
   for (const key in database) {
     if (database[key].userID === userId) {
@@ -23,4 +23,4 @@ const urlsForUser = (userId, database) => {
   return userURL;
 };
 
-module.exports = { getUserByEmail, generateRandomString, urlsForUser };
+module.exports = { getUserByEmail, generateRandomString, getUrlsForUser };
