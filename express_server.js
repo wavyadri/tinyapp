@@ -72,7 +72,7 @@ app.get('/urls', (req, res) => {
   }
 
   // get only URLs matching userId
-  let userURL = urlsForUser(userId, urlDatabase);
+  const userURL = urlsForUser(userId, urlDatabase);
 
   const templateVars = { urls: userURL, user };
   res.render('urls_index', templateVars);
@@ -104,7 +104,6 @@ app.post('/login', (req, res) => {
 
   // check if a user exists with this password
   if (bcrypt.compareSync(password, user.password) === false) {
-    console.log('failed');
     res
       .status(403)
       .send('Incorrect user email and password combination. Please try again.');
