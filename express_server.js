@@ -52,9 +52,6 @@ const users = {
 
 // HTTP requests
 app.get('/', (req, res) => {
-  // res.redirect('/login');
-
-  /// UPDATED VERSION /////
   const userId = req.session.user_id;
   const user = users[userId];
 
@@ -62,6 +59,7 @@ app.get('/', (req, res) => {
   if (!user) {
     return res.redirect('/login');
   }
+
   res.redirect('/urls');
 });
 
@@ -75,7 +73,6 @@ app.get('/urls', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  // check if user is logged in
   if (!user) {
     return res
       .status(401)
