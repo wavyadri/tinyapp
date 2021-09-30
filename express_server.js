@@ -70,16 +70,26 @@ function getUserId(email, userDb) {
 }
 
 function validRegistration(email, password) {
-  if (email === '' || password === '') return false;
+  if (!email || !password) {
+    return false;
+  }
   return true;
 }
 
-function userIsFound(email, userDb) {
-  for (const key in userDb) {
-    if (userDb[key].email === email) return true;
+function userIsFound(email, database) {
+  for (const key in database) {
+    if (database[key].email === email) return true;
   }
   return false;
 }
+
+const getUserByEmail = function (email, database) {
+  for (let key in database) {
+    if (database[key].email === email) {
+      return database[key].id;
+    }
+  }
+};
 
 // add userDb back as a param!!!!!!
 function urlsForUser(userId) {
@@ -139,7 +149,7 @@ app.post('/login', (req, res) => {
   const id = getUserId(email, users);
 
   // check if a user exists with this email
-  if (!userIsFound(email, users)) {
+  if (!getUserByEmail(email, users)) {
     res
       .status(403)
       .send(
@@ -177,8 +187,8 @@ app.post('/register', (req, res) => {
   // TODO: refactor into create user helper
   const id = generateRandomString();
   const email = req.body.email;
-  // const password = req.body.password;
-  const password = bcrypt.hashSync(req.body.password, 10);
+  const password = req.body.password;
+  // const password = bcrypt.hashSync(req.body.password, 10);
 
   // check if email and password are empty
   if (!validRegistration(email, password)) {
@@ -187,17 +197,17 @@ app.post('/register', (req, res) => {
   }
 
   // check if email already exists in Db
-  if (userIsFound(email, users)) {
+  if (getUserByEmail(email, users)) {
     res
       .status(400)
       .send(`A user with ${email} has already registered. Please try again.`);
     return;
   }
 
-  // const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   // after checks have passed, add new user to db
-  users[id] = { id, email, password };
+  users[id] = { id, email, hashedPassword };
 
   // set cookie
   // res.cookie('user_id', id);
