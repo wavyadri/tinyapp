@@ -78,6 +78,9 @@ app.get('/urls', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
+  console.log(users);
+  console.log(urlDatabase);
+
   if (!user) {
     return res
       .status(401)
@@ -219,7 +222,7 @@ app.delete('/urls/:shortURL/delete', (req, res) => {
 });
 
 // edit submit button
-app.post('/urls/:shortURL', (req, res) => {
+app.put('/urls/:shortURL', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
