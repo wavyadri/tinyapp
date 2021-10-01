@@ -17,9 +17,10 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <!-- <h5 class="card-title">TinyURL for: <%= longURL %></h5> -->
+        <p class="=card-text">Total Link Visits: <%= visits %></p>
         <p class="card-text">
-          Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a>
+          Short URL:
+          <a href="/u/<%= shortURL %>" target="_blank"><%= shortURL %></a>
         </p>
       </div>
       <div class="card-footer text-muted">
@@ -43,7 +44,6 @@
         </form>
       </div>
     </div>
-    <!-- <a href="#">Link To URL Shortener</a> -->
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

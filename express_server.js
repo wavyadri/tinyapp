@@ -31,10 +31,12 @@ const urlDatabase = {
   sgq3y6: {
     longURL: 'https://www.tsn.ca',
     userID: 'aJ48lW',
+    visits: 0,
   },
   i3BoGr: {
     longURL: 'https://www.google.ca',
     userID: 'aJ48lW',
+    visits: 0,
   },
 };
 
@@ -182,6 +184,7 @@ app.post('/urls', (req, res) => {
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: userId,
+    visits: 0,
   };
 
   if (!user) {
@@ -289,19 +292,24 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     shortURL,
     longURL: urlDatabase[shortURL].longURL,
+    visits: urlDatabase[shortURL].visits,
     user,
   };
 
   res.render('urls_show', templateVars);
 });
 
-// click on shortURL to be redirected to longURL
+// click on shortURL to be redirected to longURL - increase visits counter
 app.get('/u/:shortURL', (req, res) => {
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     return res.status(404).send('Not found! This URL is not valid on TinyApp!');
   }
 
-  const longURL = urlDatabase[req.params.shortURL].longURL;
+  // increase click count
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL].visits += 1;
+
+  const longURL = urlDatabase[shortURL].longURL;
   res.redirect(longURL);
 });
 
