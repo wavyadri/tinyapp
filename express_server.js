@@ -21,6 +21,9 @@ app.use(
     keys: ['sample'],
   })
 );
+// method override stretch
+app.use(methodOverride('_method'));
+
 app.set('view engine', 'ejs');
 
 // Databases
@@ -189,7 +192,7 @@ app.post('/urls', (req, res) => {
 });
 
 // delete button
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.delete('/urls/:shortURL/delete', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
