@@ -32,11 +32,13 @@ const urlDatabase = {
     longURL: 'https://www.tsn.ca',
     userID: 'aJ48lW',
     visits: 0,
+    uniqueVisits: 0,
   },
   i3BoGr: {
     longURL: 'https://www.google.ca',
     userID: 'aJ48lW',
     visits: 0,
+    uniqueVisits: 0,
   },
 };
 
@@ -80,9 +82,6 @@ app.get('/urls', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
 
-  console.log(users);
-  console.log(urlDatabase);
-
   if (!user) {
     return res
       .status(401)
@@ -103,6 +102,13 @@ app.get('/login', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user };
+
+  // if user is logged in and trys to access /login
+  if (user) {
+    // same procedure as logout
+    req.session = null;
+    res.redirect('/login');
+  }
 
   res.render('urls_login', templateVars);
 });
@@ -140,6 +146,13 @@ app.get('/register', (req, res) => {
   const userId = req.session.user_id;
   const user = users[userId];
   const templateVars = { user };
+
+  // if user is logged in and trys to access /register
+  if (user) {
+    // same procedure as logout
+    req.session = null;
+    res.redirect('/login');
+  }
 
   res.render('urls_register', templateVars);
 });
@@ -185,6 +198,7 @@ app.post('/urls', (req, res) => {
     longURL: req.body.longURL,
     userID: userId,
     visits: 0,
+    uniqueVisits: 0,
   };
 
   if (!user) {
@@ -293,6 +307,7 @@ app.get('/urls/:shortURL', (req, res) => {
     shortURL,
     longURL: urlDatabase[shortURL].longURL,
     visits: urlDatabase[shortURL].visits,
+    uniqueVisits: urlDatabase[shortURL].uniqueVisits,
     user,
   };
 
